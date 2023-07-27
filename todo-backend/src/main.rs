@@ -2,7 +2,7 @@ use std::net::SocketAddr;
 
 use axum::{
     Router,
-    routing::get, extract::{State, Path}, Json, Form
+    routing::{get, post}, extract::{State, Path}, Json, Form, response::Redirect
 };
 use axum_error::Result;
 use serde::{Serialize, Deserialize};
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     // Create router for server
     let app = Router::new()
         .route("/", get(list))
-        .route("/create", get(create))
+        .route("/create", post(create))
         .route("/delete/:id", get(delete))
         .route("/update", get(update))
         .with_state(pool)
@@ -58,7 +58,7 @@ async fn list(
 async fn create(
     State(pool): State<SqlitePool>,
     Form(todo): Form<NewTodo>
-) -> Result<String> {
+) -> Result<Redirect> {
     // Create TODO
     sqlx::query!(
         "INSERT INTO todos (description) VALUES (?)",
@@ -67,13 +67,13 @@ async fn create(
         .execute(&pool)
         .await?;
 
-    Ok(format!("Successfully inserted TODO!"))
+    Ok(Redirect::to("http://localhost:5173"))
 }
 
 async fn delete(
     State(pool): State<SqlitePool>,
     Path(id): Path<i64>
-) -> Result<String> {
+) -> Result<Redirect> {
     // Create TODO
     sqlx::query!(
         "DELETE FROM todos where id = ?",
@@ -82,13 +82,13 @@ async fn delete(
         .execute(&pool)
         .await?;
 
-    Ok(format!("Successfully deleted TODO!"))
+    Ok(Redirect::to("http://localhost:5173"))
 }
 
 async fn update(
     State(pool): State<SqlitePool>,
     Form(todo): Form<Todo>
-) -> Result<String> {
+) -> Result<Redirect> {
     // Create TODO
     sqlx::query!(
         "UPDATE todos SET description = ?, done = ? WHERE id = ?",
@@ -99,5 +99,5 @@ async fn update(
         .execute(&pool)
         .await?;
 
-    Ok(format!("Successfully updated TODO!"))
+    Ok(Redirect::to("http://localhost:5173"))
 }
