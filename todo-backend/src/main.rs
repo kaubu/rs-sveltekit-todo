@@ -2,7 +2,11 @@ use std::net::SocketAddr;
 
 use axum::{
     Router,
-    routing::{get, post}, extract::{State, Path}, Json, Form, response::Redirect
+    routing::{get, post},
+    extract::{State, Path},
+    Json,
+    Form,
+    response::Redirect
 };
 use axum_error::Result;
 use serde::{Serialize, Deserialize};
